@@ -1,8 +1,6 @@
 package goray
 
 type Matrix [16]float64
-type Matrix3x3 [9]float64
-type Matrix2x2 [4]float64
 
 func NewMatrix(m ...float64) Matrix {
 	return Matrix(m[:16])
@@ -12,24 +10,12 @@ func IdentityMatrix() Matrix {
 	return Matrix{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
 }
 
-func NewMatrix3x3(m ...float64) Matrix3x3 {
-	return Matrix3x3(m[:9])
-}
-
-func NewMatrix2x2(m ...float64) Matrix2x2 {
-	return Matrix2x2(m[:4])
+func (m Matrix) Write(row, col int, value float64) {
+	m[row*4+col] = value
 }
 
 func (m Matrix) At(row, col int) float64 {
 	return m[row*4+col]
-}
-
-func (m Matrix3x3) At(row, col int) float64 {
-	return m[row*3+col]
-}
-
-func (m Matrix2x2) At(row, col int) float64 {
-	return m[row*2+col]
 }
 
 func (m Matrix) Mul(n Matrix) Matrix {
@@ -55,4 +41,63 @@ func (m Matrix) Mult(t Tuple) Tuple {
 		r[i] = t.Dot(t2)
 	}
 	return NewTuple(r[0], r[1], r[2], r[3])
+}
+
+func (m Matrix) Transpose() Matrix {
+	r := [16]float64{}
+	for row := range 4 {
+		for col := range 4 {
+			r[col*4+row] = m.At(row, col)
+		}
+	}
+	return Matrix(r)
+}
+
+func (m Matrix) Submatrix(xrow, xcol int) Matrix3x3 {
+	r := make([]float64, 0)
+	for row := range 4 {
+		for col := range 4 {
+			if row != xrow && col != xcol {
+				r = append(r, m.At(row, col))
+			}
+		}
+	}
+	return Matrix3x3(r)
+}
+
+func (m Matrix) Minor(row, col int) float64 {
+	return m.Submatrix(row, col).Determinant()
+}
+
+func (m Matrix) Cofactor(row, col int) float64 {
+	minor := m.Minor(row, col)
+	if (row+col)%2 == 1 {
+		return -minor
+	}
+	return minor
+}
+
+func (m Matrix) Determinant() float64 {
+	r := 0.0
+	for col := range 4 {
+		r += m.At(0, col) * m.Cofactor(0, col)
+	}
+	return r
+}
+
+func (m Matrix) IsInvertible() bool {
+	return m.Determinant() != 0.0
+}
+
+func (m Matrix) Inverse() Matrix {
+	if !m.IsInvertible() {
+		panic(m)
+	}
+	r := make([]float64, 16)
+	for row := range 4 {
+		for col := range 4 {
+			r[col*4+row] = m.Cofactor(row, col) / m.Determinant()
+		}
+	}
+	return Matrix(r)
 }
