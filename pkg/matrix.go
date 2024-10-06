@@ -27,3 +27,28 @@ func (m Matrix3x3) At(row, col int) float64 {
 func (m Matrix2x2) At(row, col int) float64 {
 	return m[row*2+col]
 }
+
+func (m Matrix) Mul(n Matrix) Matrix {
+	r := make([]float64, 16)
+
+	for row := range 4 {
+		for col := range 4 {
+			val := 0.0
+			for i := range 4 {
+				val += m.At(row, i) * n.At(i, col)
+			}
+			r[row*4+col] = val
+		}
+	}
+	return Matrix(r)
+}
+
+func (m Matrix) Mult(t Tuple) Tuple {
+	r := make([]float64, 4)
+	for i := range 4 {
+		s := i * 4
+		t2 := NewTuple(m[s], m[s+1], m[s+2], m[s+3])
+		r[i] = t.Dot(t2)
+	}
+	return NewTuple(r[0], r[1], r[2], r[3])
+}
