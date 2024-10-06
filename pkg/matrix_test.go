@@ -84,4 +84,16 @@ func TestMultiplyingMatrices(t *testing.T) {
 
 		assert.True(t, TuplesEqual(a.Mult(tup), NewTuple(18, 24, 33, 1)))
 	})
+
+	t.Run("multiplying by the identity matrix", func(t *testing.T) {
+		a := NewMatrix(0, 1, 2, 4, 1, 2, 4, 8, 2, 4, 8, 16, 4, 8, 16, 32)
+
+		assert.True(t, MatricesEqual(a.Mul(IdentityMatrix()), a))
+	})
+
+	t.Run("multiplying the identity matrix by a tuple", func(t *testing.T) {
+		a := NewTuple(1, 2, 3, 4)
+
+		assert.True(t, TuplesEqual(IdentityMatrix().Mult(a), a))
+	})
 }

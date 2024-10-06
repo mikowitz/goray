@@ -8,6 +8,10 @@ func NewMatrix(m ...float64) Matrix {
 	return Matrix(m[:16])
 }
 
+func IdentityMatrix() Matrix {
+	return Matrix{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+}
+
 func NewMatrix3x3(m ...float64) Matrix3x3 {
 	return Matrix3x3(m[:9])
 }
