@@ -41,7 +41,7 @@ func TestConstructingPPMPixelData(t *testing.T) {
 
 	lines := strings.Split(ppm, "\n")
 
-	assert.Equal(t, lines[0], "PPM")
+	assert.Equal(t, lines[0], "P3")
 	assert.Equal(t, lines[1], "5 3")
 	assert.Equal(t, lines[2], "255")
 

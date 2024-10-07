@@ -34,5 +34,5 @@ func (c Canvas) ToPpm() string {
 		pixels[i] = p.ToPpm()
 	}
 
-	return fmt.Sprintf("PPM\n%d %d\n255\n%s\n", c.Width, c.Height, strings.Join(pixels, "\n"))
+	return fmt.Sprintf("P3\n%d %d\n255\n%s\n", c.Width, c.Height, strings.Join(pixels, "\n"))
 }
