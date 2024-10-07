@@ -1,6 +1,11 @@
 package goray
 
-import "math"
+import (
+	"math"
+	"os"
+
+	"github.com/schollz/progressbar/v3"
+)
 
 type Camera struct {
 	Width, Height         int
@@ -54,11 +59,16 @@ func (c Camera) RayForPixel(x, y int) Ray {
 func (c Camera) Render(w World) Canvas {
 	canvas := NewCanvas(c.Width, c.AspectRatio)
 
+	bar := progressbar.NewOptions(c.Width*c.Height,
+		progressbar.OptionSetWriter(os.Stderr),
+	)
+
 	for y := range c.Height {
 		for x := range c.Width {
 			ray := c.RayForPixel(x, y)
 			color := w.ColorAt(ray)
 			canvas.Write(x, y, color)
+			bar.Add(1)
 		}
 	}
 	return canvas
