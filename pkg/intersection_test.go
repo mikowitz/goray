@@ -7,7 +7,7 @@ import (
 )
 
 func TestCreatingAnIntersection(t *testing.T) {
-	s := DemoSphere()
+	s := NewSphere()
 	i := NewIntersection(3.5, s)
 
 	assert.Equal(t, i.T, 3.5)
@@ -15,7 +15,7 @@ func TestCreatingAnIntersection(t *testing.T) {
 }
 
 func TestIntersections(t *testing.T) {
-	s := DemoSphere()
+	s := NewSphere()
 	i1 := NewIntersection(1, s)
 	i2 := NewIntersection(2, s)
 
@@ -27,7 +27,7 @@ func TestIntersections(t *testing.T) {
 }
 
 func TestHit(t *testing.T) {
-	s := DemoSphere()
+	s := NewSphere()
 
 	t.Run("when all intersections have positive t", func(t *testing.T) {
 		i1 := NewIntersection(1, s)
