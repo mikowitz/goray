@@ -68,6 +68,22 @@ func TestShadeHit(t *testing.T) {
 
 		assert.True(t, TuplesEqual(c, NewColor(0.90498, 0.90498, 0.90498)))
 	})
+
+	t.Run("for an intersection in shadow", func(t *testing.T) {
+		w := NewWorld()
+		w.LightSource = NewPointLight(NewPoint(0, 0, -10), NewColor(1, 1, 1))
+		s1 := NewSphere()
+		s2 := NewSphere()
+		s2.SetTransform(Translation(0, 0, 10))
+		w.Objects = []Sphere{s1, s2}
+
+		r := NewRay(NewPoint(0, 0, 5), NewVector(0, 0, 1))
+		i := NewIntersection(4, s2)
+		comps := i.PrepareComputations(r)
+		c := w.ShadeHit(comps)
+
+		assert.True(t, TuplesEqual(c, NewColor(0.1, 0.1, 0.1)))
+	})
 }
 
 func TestColorAt(t *testing.T) {

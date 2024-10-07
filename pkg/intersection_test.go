@@ -96,4 +96,16 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		assert.True(t, TuplesEqual(comps.Normalv, NewVector(0, 0, -1)))
 		assert.True(t, comps.Inside)
 	})
+
+	t.Run("the hit should offset the point", func(t *testing.T) {
+		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
+		shape := NewSphere()
+		shape.SetTransform(Translation(0, 0, 1))
+		i := NewIntersection(5, shape)
+
+		comps := i.PrepareComputations(r)
+		assert.True(t, comps.OverPoint.z < -0.000005)
+		assert.True(t, comps.Point.z > comps.OverPoint.z)
+
+	})
 }

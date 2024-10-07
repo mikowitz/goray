@@ -16,6 +16,7 @@ type Computations struct {
 	Object        Sphere
 	T             float64
 	Point         Point
+	OverPoint     Point
 	Eyev, Normalv Vector
 	Inside        bool
 }
@@ -36,12 +37,13 @@ func (i Intersection) PrepareComputations(ray Ray) Computations {
 	}
 
 	return Computations{
-		Object:  i.Object,
-		T:       i.T,
-		Point:   point,
-		Eyev:    eyev,
-		Normalv: normalv,
-		Inside:  inside,
+		Object:    i.Object,
+		T:         i.T,
+		Point:     point,
+		OverPoint: point.Add(normalv.Mul(0.00001)),
+		Eyev:      eyev,
+		Normalv:   normalv,
+		Inside:    inside,
 	}
 }
 

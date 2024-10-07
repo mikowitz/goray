@@ -26,7 +26,8 @@ func (w World) Intersect(ray Ray) Intersections {
 }
 
 func (w World) ShadeHit(c Computations) Color {
-	return c.Object.Material.Lighting(w.LightSource, c.Point, c.Eyev, c.Normalv, false)
+	inShadow := w.IsShadowed(c.OverPoint)
+	return c.Object.Material.Lighting(w.LightSource, c.Point, c.Eyev, c.Normalv, inShadow)
 }
 
 func (w World) ColorAt(r Ray) Color {
