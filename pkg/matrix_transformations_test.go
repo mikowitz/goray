@@ -33,6 +33,30 @@ func TestMatrixTransformations(t *testing.T) {
 			transform:   Translation(5, -3, 2),
 			description: "translation does not affect vectors",
 		},
+		TransformTestCase{
+			transform:   Scaling(2, 3, 4),
+			original:    NewPoint(-4, 6, 8),
+			result:      NewPoint(-8, 18, 32),
+			description: "scaling matrix applied to a point",
+		},
+		TransformTestCase{
+			transform:   Scaling(2, 3, 4),
+			original:    NewVector(-4, 6, 8),
+			result:      NewVector(-8, 18, 32),
+			description: "scaling matrix applied to a vector",
+		},
+		TransformTestCase{
+			transform:   Scaling(2, 3, 4).Inverse(),
+			original:    NewVector(-4, 6, 8),
+			result:      NewVector(-2, 2, 2),
+			description: "multiplying by the inverse of a scaling matrix",
+		},
+		TransformTestCase{
+			transform:   Scaling(-1, 1, 1),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(-2, 3, 4),
+			description: "reflection is scaling by a negative value",
+		},
 	}
 
 	for _, tc := range testCases {
