@@ -2,6 +2,7 @@ package goray
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -56,6 +57,48 @@ func TestMatrixTransformations(t *testing.T) {
 			original:    NewVector(2, 3, 4),
 			result:      NewVector(-2, 3, 4),
 			description: "reflection is scaling by a negative value",
+		},
+		TransformTestCase{
+			transform:   RotationX(math.Pi / 4),
+			original:    NewVector(0, 1, 0),
+			result:      NewVector(0, math.Sqrt2/2, math.Sqrt2/2),
+			description: "rotating a point π/4 around the x axis",
+		},
+		TransformTestCase{
+			transform:   RotationX(math.Pi / 2),
+			original:    NewVector(0, 1, 0),
+			result:      NewVector(0, 0, 1),
+			description: "rotating a point π/2 around the x axis",
+		},
+		TransformTestCase{
+			transform:   RotationX(math.Pi / 4).Inverse(),
+			original:    NewVector(0, 1, 0),
+			result:      NewVector(0, math.Sqrt2/2, -math.Sqrt2/2),
+			description: "the inverse of an x-rotation rotates in the opposite direction",
+		},
+		TransformTestCase{
+			transform:   RotationY(math.Pi / 4),
+			original:    NewVector(0, 0, 1),
+			result:      NewVector(math.Sqrt2/2, 0, math.Sqrt2/2),
+			description: "rotating a point π/4 around the y axis",
+		},
+		TransformTestCase{
+			transform:   RotationY(math.Pi / 2),
+			original:    NewVector(0, 0, 1),
+			result:      NewVector(1, 0, 0),
+			description: "rotating a point π/2 around the y axis",
+		},
+		TransformTestCase{
+			transform:   RotationZ(math.Pi / 4),
+			original:    NewVector(0, 1, 0),
+			result:      NewVector(-math.Sqrt2/2, math.Sqrt2/2, 0),
+			description: "rotating a point π/4 around the z axis",
+		},
+		TransformTestCase{
+			transform:   RotationZ(math.Pi / 2),
+			original:    NewVector(0, 1, 0),
+			result:      NewVector(-1, 0, 0),
+			description: "rotating a point π/2 around the z axis",
 		},
 	}
 
