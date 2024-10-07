@@ -67,3 +67,7 @@ func (u Tuple) Cross(v Tuple) Tuple {
 		u.x*v.y-u.y*v.x,
 	)
 }
+
+func (u Tuple) Reflect(n Tuple) Tuple {
+	return u.Sub(n.Mul(2.0 * u.Dot(n)))
+}

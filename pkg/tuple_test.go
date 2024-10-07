@@ -133,3 +133,23 @@ func TestCrossProduct(t *testing.T) {
 	assert.True(t, TuplesEqual(a.Cross(b), NewVector(-1, 2, -1)))
 	assert.True(t, TuplesEqual(b.Cross(a), NewVector(1, -2, 1)))
 }
+
+func TestReflect(t *testing.T) {
+	t.Run("reflecting a vector approaching at 45 degrees", func(t *testing.T) {
+		v := NewVector(1, -1, 0)
+		n := NewVector(0, 1, 0)
+
+		r := v.Reflect(n)
+
+		assert.True(t, TuplesEqual(r, NewVector(1, 1, 0)))
+	})
+
+	t.Run("reflecting a vector off a slanted surface", func(t *testing.T) {
+		v := NewVector(0, -1, 0)
+		n := NewVector(math.Sqrt2/2, math.Sqrt2/2, 0)
+
+		r := v.Reflect(n)
+
+		assert.True(t, TuplesEqual(r, NewVector(1, 0, 0)))
+	})
+}
