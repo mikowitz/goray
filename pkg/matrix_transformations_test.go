@@ -145,3 +145,32 @@ func TestMatrixTransformations(t *testing.T) {
 		})
 	}
 }
+
+func TestChainingTransformations(t *testing.T) {
+	t.Run("individual transformations are applied in sequence", func(t *testing.T) {
+		p := NewPoint(1, 0, 1)
+		a := RotationX(math.Pi / 2)
+		b := Scaling(5, 5, 5)
+		c := Translation(10, 5, 7)
+
+		p2 := a.Mult(p)
+		assert.True(t, TuplesEqual(p2, NewPoint(1, -1, 0)))
+
+		p3 := b.Mult(p2)
+		assert.True(t, TuplesEqual(p3, NewPoint(5, -5, 0)))
+
+		p4 := c.Mult(p3)
+		assert.True(t, TuplesEqual(p4, NewPoint(15, 0, 7)))
+	})
+
+	t.Run("chained transformations must be applied in reverse order", func(t *testing.T) {
+		p := NewPoint(1, 0, 1)
+		a := RotationX(math.Pi / 2)
+		b := Scaling(5, 5, 5)
+		c := Translation(10, 5, 7)
+
+		transform := c.Mul(b).Mul(a)
+
+		assert.True(t, TuplesEqual(transform.Mult(p), NewPoint(15, 0, 7)))
+	})
+}
