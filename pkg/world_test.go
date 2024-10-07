@@ -1,7 +1,6 @@
 package goray
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -95,9 +94,6 @@ func TestColorAt(t *testing.T) {
 
 		r := NewRay(NewPoint(0, 0, 0.75), NewVector(0, 0, -1))
 		c := w.ColorAt(r)
-
-		fmt.Println(c)
-		fmt.Println(w.Objects[1].Material.Color)
 
 		assert.True(t, TuplesEqual(c, w.Objects[1].Material.Color))
 	})
