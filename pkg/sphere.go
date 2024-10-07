@@ -4,6 +4,7 @@ type Sphere struct {
 	Center    Point
 	Radius    float64
 	Transform Matrix
+	Material  Material
 }
 
 func NewSphere() Sphere {
@@ -11,11 +12,16 @@ func NewSphere() Sphere {
 		Center:    NewPoint(0, 0, 0),
 		Radius:    1.0,
 		Transform: IdentityMatrix(),
+		Material:  NewMaterial(),
 	}
 }
 
 func (s *Sphere) SetTransform(m Matrix) {
 	s.Transform = m
+}
+
+func (s *Sphere) SetMaterial(m Material) {
+	s.Material = m
 }
 
 func (s Sphere) NormalAt(p Point) Vector {

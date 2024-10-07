@@ -7,6 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSphereMaterial(t *testing.T) {
+	t.Run("a sphere's default material", func(t *testing.T) {
+		s := NewSphere()
+		assert.Equal(t, s.Material, NewMaterial())
+	})
+
+	t.Run("changing a sphere's material", func(t *testing.T) {
+		s := NewSphere()
+		m := NewMaterial()
+		m.Ambient = 1.0
+		m.Diffuse = 0.5
+		s.SetMaterial(m)
+		assert.Equal(t, s.Material, m)
+	})
+}
+
 func TestSphereTransform(t *testing.T) {
 	t.Run("a sphere's default transformation", func(t *testing.T) {
 		s := NewSphere()
