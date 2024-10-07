@@ -100,6 +100,42 @@ func TestMatrixTransformations(t *testing.T) {
 			result:      NewVector(-1, 0, 0),
 			description: "rotating a point π/2 around the z axis",
 		},
+		TransformTestCase{
+			transform:   Shearing(1, 0, 0, 0, 0, 0),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(5, 3, 4),
+			description: "shearing moves x in proportion to y",
+		},
+		TransformTestCase{
+			transform:   Shearing(0, 1, 0, 0, 0, 0),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(6, 3, 4),
+			description: "shearing moves x in proportion to z",
+		},
+		TransformTestCase{
+			transform:   Shearing(0, 0, 1, 0, 0, 0),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(2, 5, 4),
+			description: "shearing moves y in proportion to x",
+		},
+		TransformTestCase{
+			transform:   Shearing(0, 0, 0, 1, 0, 0),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(2, 7, 4),
+			description: "shearing moves y in proportion to z",
+		},
+		TransformTestCase{
+			transform:   Shearing(0, 0, 0, 0, 1, 0),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(2, 3, 6),
+			description: "shearing moves z in proportion to x",
+		},
+		TransformTestCase{
+			transform:   Shearing(0, 0, 0, 0, 0, 1),
+			original:    NewVector(2, 3, 4),
+			result:      NewVector(2, 3, 7),
+			description: "shearing moves z in proportion to y",
+		},
 	}
 
 	for _, tc := range testCases {

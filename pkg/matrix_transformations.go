@@ -44,3 +44,14 @@ func RotationZ(radians float64) Matrix {
 	m.Write(1, 1, math.Cos(radians))
 	return m
 }
+
+func Shearing(xy, xz, yx, yz, zx, zy float64) Matrix {
+	m := IdentityMatrix()
+	m.Write(0, 1, xy)
+	m.Write(0, 2, xz)
+	m.Write(1, 0, yx)
+	m.Write(1, 2, yz)
+	m.Write(2, 0, zx)
+	m.Write(2, 1, zy)
+	return m
+}
