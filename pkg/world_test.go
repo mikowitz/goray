@@ -98,3 +98,22 @@ func TestColorAt(t *testing.T) {
 		assert.True(t, TuplesEqual(c, w.Objects[1].Material.Color))
 	})
 }
+
+func TestIsShadowed(t *testing.T) {
+	w := defaultWorld()
+	testCases := map[Point]bool{
+		NewPoint(0, 10, 0):     false,
+		NewPoint(10, -10, 10):  true,
+		NewPoint(-20, 20, -20): false,
+		NewPoint(-2, 2, -2):    false,
+	}
+
+	for p, b := range testCases {
+		if b {
+			assert.True(t, w.IsShadowed(p))
+		} else {
+			assert.False(t, w.IsShadowed(p))
+		}
+	}
+
+}

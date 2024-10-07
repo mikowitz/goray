@@ -37,3 +37,15 @@ func (w World) ColorAt(r Ray) Color {
 	}
 	return NewColor(0, 0, 0)
 }
+
+func (w World) IsShadowed(point Point) bool {
+	v := w.LightSource.Position.Sub(point)
+	distance := v.Magnitude()
+	ray := NewRay(point, v.Normalize())
+	xs := w.Intersect(ray)
+
+	if hit, isHit := xs.Hit(); isHit {
+		return hit.T < distance
+	}
+	return false
+}
