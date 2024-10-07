@@ -10,7 +10,7 @@ func IdentityMatrix() Matrix {
 	return Matrix{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
 }
 
-func (m Matrix) Write(row, col int, value float64) {
+func (m *Matrix) Write(row, col int, value float64) {
 	m[row*4+col] = value
 }
 
@@ -20,7 +20,6 @@ func (m Matrix) At(row, col int) float64 {
 
 func (m Matrix) Mul(n Matrix) Matrix {
 	r := make([]float64, 16)
-
 	for row := range 4 {
 		for col := range 4 {
 			val := 0.0
@@ -44,7 +43,7 @@ func (m Matrix) Mult(t Tuple) Tuple {
 }
 
 func (m Matrix) Transpose() Matrix {
-	r := [16]float64{}
+	r := make([]float64, 16)
 	for row := range 4 {
 		for col := range 4 {
 			r[col*4+row] = m.At(row, col)
