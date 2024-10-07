@@ -68,7 +68,10 @@ func (c Camera) Render(w World) Canvas {
 			ray := c.RayForPixel(x, y)
 			color := w.ColorAt(ray)
 			canvas.Write(x, y, color)
-			bar.Add(1)
+			err := bar.Add(1)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 	return canvas
