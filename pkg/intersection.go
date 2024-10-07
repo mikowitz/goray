@@ -12,8 +12,37 @@ type Intersection struct {
 
 type Intersections []Intersection
 
+type Computations struct {
+	Object        Sphere
+	T             float64
+	Point         Point
+	Eyev, Normalv Vector
+	Inside        bool
+}
+
 func NewIntersection(t float64, s Sphere) Intersection {
 	return Intersection{T: t, Object: s}
+}
+
+func (i Intersection) PrepareComputations(ray Ray) Computations {
+	point := ray.At(i.T)
+	eyev := ray.Direction.Neg()
+	normalv := i.Object.NormalAt(point)
+	inside := false
+
+	if normalv.Dot(eyev) < 0 {
+		inside = true
+		normalv = normalv.Neg()
+	}
+
+	return Computations{
+		Object:  i.Object,
+		T:       i.T,
+		Point:   point,
+		Eyev:    eyev,
+		Normalv: normalv,
+		Inside:  inside,
+	}
 }
 
 func (xs Intersections) Hit() (Intersection, bool) {

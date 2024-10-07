@@ -67,3 +67,33 @@ func TestHit(t *testing.T) {
 		assert.Equal(t, hit, i4)
 	})
 }
+
+func TestPrecomputingIntersectionState(t *testing.T) {
+	t.Run("when an intersection occurs on the outside", func(t *testing.T) {
+		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
+		shape := NewSphere()
+		i := NewIntersection(4, shape)
+
+		comps := i.PrepareComputations(r)
+
+		assert.Equal(t, comps.T, i.T)
+		assert.True(t, TuplesEqual(comps.Point, NewPoint(0, 0, -1)))
+		assert.True(t, TuplesEqual(comps.Eyev, NewVector(0, 0, -1)))
+		assert.True(t, TuplesEqual(comps.Normalv, NewVector(0, 0, -1)))
+		assert.False(t, comps.Inside)
+	})
+
+	t.Run("when an intersection occurs on the inside", func(t *testing.T) {
+		r := NewRay(NewPoint(0, 0, 0), NewVector(0, 0, 1))
+		shape := NewSphere()
+		i := NewIntersection(1, shape)
+
+		comps := i.PrepareComputations(r)
+
+		assert.Equal(t, comps.T, i.T)
+		assert.True(t, TuplesEqual(comps.Point, NewPoint(0, 0, 1)))
+		assert.True(t, TuplesEqual(comps.Eyev, NewVector(0, 0, -1)))
+		assert.True(t, TuplesEqual(comps.Normalv, NewVector(0, 0, -1)))
+		assert.True(t, comps.Inside)
+	})
+}
