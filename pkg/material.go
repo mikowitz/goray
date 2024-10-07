@@ -17,7 +17,7 @@ func NewMaterial() Material {
 	}
 }
 
-func (m Material) Lighting(light PointLight, point Point, eyev, normalv Vector) Color {
+func (m Material) Lighting(light PointLight, point Point, eyev, normalv Vector, inShadow bool) Color {
 	effectiveColor := m.Color.Prod(light.Intensity)
 	lightv := light.Position.Sub(point).Normalize()
 
@@ -39,5 +39,8 @@ func (m Material) Lighting(light PointLight, point Point, eyev, normalv Vector) 
 		}
 	}
 
+	if inShadow {
+		return ambient
+	}
 	return ambient.Add(diffuse).Add(specular)
 }
