@@ -7,6 +7,14 @@ import (
 
 type Color = Tuple
 
+func Black() Color {
+	return NewColor(0, 0, 0)
+}
+
+func White() Color {
+	return NewColor(1, 1, 1)
+}
+
 func NewColor(r, g, b float64) Color {
 	return Color{x: r, y: g, z: b, w: 0}
 }

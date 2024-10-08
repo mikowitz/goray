@@ -8,8 +8,9 @@ import (
 
 func defaultWorld() World {
 	s1 := NewSphere()
+	pattern := NewSolidPattern(NewColor(0.8, 1, 0.6))
 	m := NewMaterial()
-	m.Color = NewColor(0.8, 1, 0.6)
+	m.Pattern = &pattern
 	m.Diffuse = 0.7
 	m.Specular = 0.2
 	s1.SetMaterial(m)
@@ -111,7 +112,7 @@ func TestColorAt(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, 0.75), NewVector(0, 0, -1))
 		c := w.ColorAt(r)
 
-		assert.True(t, TuplesEqual(c, w.Objects[1].GetMaterial().Color))
+		assert.True(t, TuplesEqual(c, w.Objects[1].GetMaterial().Pattern.At(r.Origin)))
 	})
 }
 
