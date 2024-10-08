@@ -51,7 +51,7 @@ func TestSurfaceNormal(t *testing.T) {
 	}
 
 	for p, n := range testCases {
-		assert.True(t, TuplesEqual(s.NormalAt(p), n))
+		assert.True(t, TuplesEqual(NormalAt(&s, p), n))
 	}
 }
 
@@ -60,7 +60,7 @@ func TestNormalOnTransformedSphere(t *testing.T) {
 		s := NewSphere()
 		s.SetTransform(Translation(0, 1, 0))
 
-		n := s.NormalAt(NewPoint(0, 1.70711, -0.70711))
+		n := NormalAt(&s, NewPoint(0, 1.70711, -0.70711))
 
 		assert.True(t, TuplesEqual(n, NewVector(0, 0.70711, -0.70711)))
 	})
@@ -70,7 +70,7 @@ func TestNormalOnTransformedSphere(t *testing.T) {
 		m := Scaling(1, 0.5, 1).Mul(RotationZ(math.Pi / 5))
 		s.SetTransform(m)
 
-		n := s.NormalAt(NewPoint(0, math.Sqrt2/2, -math.Sqrt2/2))
+		n := NormalAt(&s, NewPoint(0, math.Sqrt2/2, -math.Sqrt2/2))
 
 		assert.True(t, TuplesEqual(n, NewVector(0, 0.97014, -0.24254)))
 	})

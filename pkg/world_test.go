@@ -19,7 +19,7 @@ func defaultWorld() World {
 
 	return World{
 		LightSource: NewPointLight(NewPoint(-10, 10, -10), NewColor(1, 1, 1)),
-		Objects:     []Sphere{s1, s2},
+		Objects:     []Shape{&s1, &s2},
 	}
 }
 
@@ -75,10 +75,10 @@ func TestShadeHit(t *testing.T) {
 		s1 := NewSphere()
 		s2 := NewSphere()
 		s2.SetTransform(Translation(0, 0, 10))
-		w.Objects = []Sphere{s1, s2}
+		w.Objects = []Shape{&s1, &s2}
 
 		r := NewRay(NewPoint(0, 0, 5), NewVector(0, 0, 1))
-		i := NewIntersection(4, s2)
+		i := NewIntersection(4, &s2)
 		comps := i.PrepareComputations(r)
 		c := w.ShadeHit(comps)
 
@@ -111,7 +111,7 @@ func TestColorAt(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, 0.75), NewVector(0, 0, -1))
 		c := w.ColorAt(r)
 
-		assert.True(t, TuplesEqual(c, w.Objects[1].Material.Color))
+		assert.True(t, TuplesEqual(c, w.Objects[1].GetMaterial().Color))
 	})
 }
 

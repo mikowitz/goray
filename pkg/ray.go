@@ -1,9 +1,5 @@
 package goray
 
-import (
-	"math"
-)
-
 type Ray struct {
 	Origin    Point
 	Direction Vector
@@ -17,24 +13,9 @@ func (r Ray) At(t float64) Point {
 	return r.Origin.Add(r.Direction.Mul(t))
 }
 
-func (ray Ray) Intersect(sphere Sphere) Intersections {
-	ray2 := ray.Transform(sphere.Transform.Inverse())
-	sphereToRay := ray2.Origin.Sub(NewPoint(0, 0, 0))
-
-	a := ray2.Direction.Dot(ray2.Direction)
-	b := 2 * ray2.Direction.Dot(sphereToRay)
-	c := sphereToRay.Dot(sphereToRay) - 1
-
-	discriminant := (b * b) - (4.0 * a * c)
-
-	if discriminant < 0.0 {
-		return Intersections{}
-	}
-
-	return Intersections{
-		NewIntersection((-b-math.Sqrt(discriminant))/(2.0*a), sphere),
-		NewIntersection((-b+math.Sqrt(discriminant))/(2.0*a), sphere),
-	}
+func (ray Ray) Intersect(shape Shape) Intersections {
+	ray2 := ray.Transform(shape.GetTransform().Inverse())
+	return shape.LocalIntersect(ray2)
 }
 
 func (ray Ray) Transform(m Matrix) Ray {

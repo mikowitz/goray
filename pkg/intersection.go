@@ -7,13 +7,13 @@ import (
 
 type Intersection struct {
 	T      float64
-	Object Sphere
+	Object Shape
 }
 
 type Intersections []Intersection
 
 type Computations struct {
-	Object        Sphere
+	Object        Shape
 	T             float64
 	Point         Point
 	OverPoint     Point
@@ -21,14 +21,14 @@ type Computations struct {
 	Inside        bool
 }
 
-func NewIntersection(t float64, s Sphere) Intersection {
+func NewIntersection(t float64, s Shape) Intersection {
 	return Intersection{T: t, Object: s}
 }
 
 func (i Intersection) PrepareComputations(ray Ray) Computations {
 	point := ray.At(i.T)
 	eyev := ray.Direction.Neg()
-	normalv := i.Object.NormalAt(point)
+	normalv := NormalAt(i.Object, point)
 	inside := false
 
 	if normalv.Dot(eyev) < 0 {

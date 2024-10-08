@@ -20,20 +20,20 @@ func TestIntersectingRaysWithSpheres(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
 		s := NewSphere()
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 2)
 		assert.Equal(t, xs[0].T, 4.0)
-		assert.Equal(t, xs[0].Object, s)
+		assert.Equal(t, xs[0].Object, &s)
 		assert.Equal(t, xs[1].T, 6.0)
-		assert.Equal(t, xs[1].Object, s)
+		assert.Equal(t, xs[1].Object, &s)
 	})
 
 	t.Run("a ray intersects a sphere at a tangent", func(t *testing.T) {
 		r := NewRay(NewPoint(0, 1, -5), NewVector(0, 0, 1))
 		s := NewSphere()
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 2)
 		assert.Equal(t, xs[0].T, 5.0)
@@ -44,7 +44,7 @@ func TestIntersectingRaysWithSpheres(t *testing.T) {
 		r := NewRay(NewPoint(0, 2, -5), NewVector(0, 0, 1))
 		s := NewSphere()
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 0)
 	})
@@ -53,7 +53,7 @@ func TestIntersectingRaysWithSpheres(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, 0), NewVector(0, 0, 1))
 		s := NewSphere()
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 2)
 		assert.Equal(t, xs[0].T, -1.0)
@@ -64,7 +64,7 @@ func TestIntersectingRaysWithSpheres(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, 5), NewVector(0, 0, 1))
 		s := NewSphere()
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 2)
 		assert.Equal(t, xs[0].T, -6.0)
@@ -76,7 +76,7 @@ func TestIntersectingRaysWithSpheres(t *testing.T) {
 		s := NewSphere()
 		s.SetTransform(Scaling(2, 2, 2))
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 2)
 		assert.Equal(t, xs[0].T, 3.0)
@@ -88,7 +88,7 @@ func TestIntersectingRaysWithSpheres(t *testing.T) {
 		s := NewSphere()
 		s.SetTransform(Translation(5, 0, 0))
 
-		xs := r.Intersect(s)
+		xs := r.Intersect(&s)
 
 		assert.Equal(t, len(xs), 0)
 	})

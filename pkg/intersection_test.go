@@ -8,16 +8,16 @@ import (
 
 func TestCreatingAnIntersection(t *testing.T) {
 	s := NewSphere()
-	i := NewIntersection(3.5, s)
+	i := NewIntersection(3.5, &s)
 
 	assert.Equal(t, i.T, 3.5)
-	assert.Equal(t, i.Object, s)
+	assert.Equal(t, i.Object, &s)
 }
 
 func TestIntersections(t *testing.T) {
 	s := NewSphere()
-	i1 := NewIntersection(1, s)
-	i2 := NewIntersection(2, s)
+	i1 := NewIntersection(1, &s)
+	i2 := NewIntersection(2, &s)
 
 	xs := Intersections{i1, i2}
 
@@ -30,8 +30,8 @@ func TestHit(t *testing.T) {
 	s := NewSphere()
 
 	t.Run("when all intersections have positive t", func(t *testing.T) {
-		i1 := NewIntersection(1, s)
-		i2 := NewIntersection(2, s)
+		i1 := NewIntersection(1, &s)
+		i2 := NewIntersection(2, &s)
 		xs := Intersections{i2, i1}
 
 		hit, _ := xs.Hit()
@@ -39,8 +39,8 @@ func TestHit(t *testing.T) {
 	})
 
 	t.Run("when some intersections have negative t", func(t *testing.T) {
-		i1 := NewIntersection(-1, s)
-		i2 := NewIntersection(1, s)
+		i1 := NewIntersection(-1, &s)
+		i2 := NewIntersection(1, &s)
 		xs := Intersections{i2, i1}
 
 		hit, _ := xs.Hit()
@@ -48,8 +48,8 @@ func TestHit(t *testing.T) {
 	})
 
 	t.Run("when all intersections have negative t", func(t *testing.T) {
-		i1 := NewIntersection(-2, s)
-		i2 := NewIntersection(-1, s)
+		i1 := NewIntersection(-2, &s)
+		i2 := NewIntersection(-1, &s)
 		xs := Intersections{i2, i1}
 
 		_, isHit := xs.Hit()
@@ -57,10 +57,10 @@ func TestHit(t *testing.T) {
 	})
 
 	t.Run("the hit is always the lowest nonnegative intersection", func(t *testing.T) {
-		i1 := NewIntersection(5, s)
-		i2 := NewIntersection(7, s)
-		i3 := NewIntersection(-3, s)
-		i4 := NewIntersection(2, s)
+		i1 := NewIntersection(5, &s)
+		i2 := NewIntersection(7, &s)
+		i3 := NewIntersection(-3, &s)
+		i4 := NewIntersection(2, &s)
 		xs := Intersections{i1, i2, i3, i4}
 
 		hit, _ := xs.Hit()
@@ -72,7 +72,7 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 	t.Run("when an intersection occurs on the outside", func(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
 		shape := NewSphere()
-		i := NewIntersection(4, shape)
+		i := NewIntersection(4, &shape)
 
 		comps := i.PrepareComputations(r)
 
@@ -86,7 +86,7 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 	t.Run("when an intersection occurs on the inside", func(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, 0), NewVector(0, 0, 1))
 		shape := NewSphere()
-		i := NewIntersection(1, shape)
+		i := NewIntersection(1, &shape)
 
 		comps := i.PrepareComputations(r)
 
@@ -101,7 +101,7 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
 		shape := NewSphere()
 		shape.SetTransform(Translation(0, 0, 1))
-		i := NewIntersection(5, shape)
+		i := NewIntersection(5, &shape)
 
 		comps := i.PrepareComputations(r)
 		assert.True(t, comps.OverPoint.z < -0.000005)
