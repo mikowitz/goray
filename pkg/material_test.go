@@ -22,6 +22,7 @@ type LightingTestCase struct {
 	eyev, normalv Vector
 	light         PointLight
 	result        Color
+	inShadow      bool
 }
 
 func TestLighting(t *testing.T) {
@@ -34,6 +35,7 @@ func TestLighting(t *testing.T) {
 			eyev:        NewVector(0, 0, -1),
 			normalv:     NewVector(0, 0, -1),
 			light:       NewPointLight(NewPoint(0, 0, -10), NewColor(1, 1, 1)),
+			inShadow:    false,
 			result:      NewColor(1.9, 1.9, 1.9),
 		},
 		LightingTestCase{
@@ -41,6 +43,7 @@ func TestLighting(t *testing.T) {
 			eyev:        NewVector(0, math.Sqrt2/2, -math.Sqrt2/2),
 			normalv:     NewVector(0, 0, -1),
 			light:       NewPointLight(NewPoint(0, 0, -10), NewColor(1, 1, 1)),
+			inShadow:    false,
 			result:      NewColor(1.0, 1.0, 1.0),
 		},
 		LightingTestCase{
@@ -48,6 +51,7 @@ func TestLighting(t *testing.T) {
 			eyev:        NewVector(0, 0, -1),
 			normalv:     NewVector(0, 0, -1),
 			light:       NewPointLight(NewPoint(0, 10, -10), NewColor(1, 1, 1)),
+			inShadow:    false,
 			result:      NewColor(0.7364, 0.7364, 0.7364),
 		},
 		LightingTestCase{
@@ -55,6 +59,7 @@ func TestLighting(t *testing.T) {
 			eyev:        NewVector(0, -math.Sqrt2/2, -math.Sqrt2/2),
 			normalv:     NewVector(0, 0, -1),
 			light:       NewPointLight(NewPoint(0, 10, -10), NewColor(1, 1, 1)),
+			inShadow:    false,
 			result:      NewColor(1.6364, 1.6364, 1.6364),
 		},
 		LightingTestCase{
@@ -62,13 +67,22 @@ func TestLighting(t *testing.T) {
 			eyev:        NewVector(0, 0, -1),
 			normalv:     NewVector(0, 0, -1),
 			light:       NewPointLight(NewPoint(0, 10, 10), NewColor(1, 1, 1)),
+			inShadow:    false,
+			result:      NewColor(0.1, 0.1, 0.1),
+		},
+		LightingTestCase{
+			description: "with the surface in shadow",
+			eyev:        NewVector(0, 0, -1),
+			normalv:     NewVector(0, 0, -1),
+			light:       NewPointLight(NewPoint(0, 0, -10), NewColor(1, 1, 1)),
+			inShadow:    true,
 			result:      NewColor(0.1, 0.1, 0.1),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			actual := m.Lighting(tc.light, position, tc.eyev, tc.normalv)
+			actual := m.Lighting(tc.light, position, tc.eyev, tc.normalv, tc.inShadow)
 			assert.True(t, TuplesEqual(tc.result, actual))
 		})
 	}
