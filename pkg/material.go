@@ -3,13 +3,14 @@ package goray
 import "math"
 
 type Material struct {
-	Color                                 Color
 	Ambient, Diffuse, Specular, Shininess float64
+	Pattern                               Pattern
 }
 
 func NewMaterial() Material {
+	pattern := NewSolidPattern(White())
 	return Material{
-		Color:     NewColor(1, 1, 1),
+		Pattern:   &pattern,
 		Ambient:   0.1,
 		Diffuse:   0.9,
 		Specular:  0.9,
@@ -17,8 +18,8 @@ func NewMaterial() Material {
 	}
 }
 
-func (m Material) Lighting(light PointLight, point Point, eyev, normalv Vector, inShadow bool) Color {
-	effectiveColor := m.Color.Prod(light.Intensity)
+func (m Material) Lighting(s Shape, light PointLight, point Point, eyev, normalv Vector, inShadow bool) Color {
+	effectiveColor := PatternAtObject(m.Pattern, s, point).Prod(light.Intensity)
 	lightv := light.Position.Sub(point).Normalize()
 
 	ambient := effectiveColor.Mul(m.Ambient)

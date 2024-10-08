@@ -39,7 +39,6 @@ func (p *Plane) LocalIntersect(r Ray) Intersections {
 	if math.Abs(r.Direction.y) < 0.00001 {
 		return Intersections{}
 	}
-	// return Intersections{}
 	t := -r.Origin.y / r.Direction.y
 	return Intersections{
 		NewIntersection(t, p),
