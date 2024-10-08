@@ -8,22 +8,28 @@ import (
 )
 
 func main() {
+	floorPattern1 := g.NewStripePattern(g.NewColor(1, 0.9, 0.9), g.NewColor(0.0, 0.5, 0.1))
+	floorPattern2 := g.NewStripePattern(g.NewColor(1, 0.9, 0.9), g.NewColor(0.0, 0.5, 0.1))
+	floorPattern2.SetTransform(g.RotationY(math.Pi / 2))
+	floorPattern := g.BlendedPattern{A: &floorPattern1, B: &floorPattern2}
+	floorPattern.SetTransform(g.Scaling(0.25, 0.25, 0.25))
 	floor := g.NewPlane()
-	// floor.SetTransform(g.Scaling(10, 0.01, 10))
-	floor.Material.Color = g.NewColor(1, 0.9, 0.9)
+	floor.Material.Pattern = &floorPattern
 	floor.Material.Specular = 0.0
 
 	wall := g.NewPlane()
 	wall.SetTransform(g.Translation(0, 0, 4).Mul(g.RotationY(math.Pi / 4)).Mul(g.RotationX(math.Pi / 2)))
-	wall.SetMaterial(floor.Material)
+	wall.Material.Pattern = &floorPattern1
 
 	otherWall := g.NewPlane()
 	otherWall.SetTransform(g.Translation(0, 0, 6).Mul(g.RotationY(-math.Pi / 4)).Mul(g.RotationX(math.Pi / 2)))
-	otherWall.SetMaterial(floor.Material)
+	// otherWall.SetMaterial(floor.Material)
 
 	middle := g.NewSphere()
 	middle.SetTransform(g.Translation(-0.5, 1, 0.5))
-	middle.Material.Color = g.NewColor(0.5, 0.1, 1)
+	purple := g.NewCheckersPattern(g.NewColor(0.5, 0.1, 1), g.NewColor(0, 0.5, 1))
+	purple.SetTransform(g.Scaling(0.25, 0.25, 0.25))
+	middle.Material.Pattern = &purple
 	middle.Material.Diffuse = 0.7
 	middle.Material.Specular = 0.3
 
@@ -37,10 +43,7 @@ func main() {
 
 	world := g.NewWorld()
 	world.LightSource = g.NewPointLight(g.NewPoint(-10, 10, -10), g.NewColor(1, 1, 1))
-	world.Objects = []g.Shape{
-		&floor, &wall, &otherWall,
-		&middle, &right, &left,
-	}
+	world.Objects = []g.Shape{}
 
 	c := g.NewCamera(200, 16./9., math.Pi/3)
 	c.Transform = g.NewViewTransform(

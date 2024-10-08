@@ -19,7 +19,7 @@ func NewMaterial() Material {
 }
 
 func (m Material) Lighting(s Shape, light PointLight, point Point, eyev, normalv Vector, inShadow bool) Color {
-	effectiveColor := m.Pattern.AtObject(s, point).Prod(light.Intensity)
+	effectiveColor := PatternAtObject(m.Pattern, s, point).Prod(light.Intensity)
 	lightv := light.Position.Sub(point).Normalize()
 
 	ambient := effectiveColor.Mul(m.Ambient)
