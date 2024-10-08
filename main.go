@@ -8,18 +8,18 @@ import (
 )
 
 func main() {
-	floor := g.NewSphere()
-	floor.SetTransform(g.Scaling(10, 0.01, 10))
+	floor := g.NewPlane()
+	// floor.SetTransform(g.Scaling(10, 0.01, 10))
 	floor.Material.Color = g.NewColor(1, 0.9, 0.9)
 	floor.Material.Specular = 0.0
 
-	leftWall := g.NewSphere()
-	leftWall.Transform = g.Translation(0, 0, 5).Mul(g.RotationY(-math.Pi / 4)).Mul(g.RotationX(math.Pi / 2)).Mul(g.Scaling(10, 0.01, 10))
-	leftWall.SetMaterial(floor.Material)
+	wall := g.NewPlane()
+	wall.SetTransform(g.Translation(0, 0, 4).Mul(g.RotationY(math.Pi / 4)).Mul(g.RotationX(math.Pi / 2)))
+	wall.SetMaterial(floor.Material)
 
-	rightWall := g.NewSphere()
-	rightWall.Transform = g.Translation(0, 0, 5).Mul(g.RotationY(math.Pi / 4)).Mul(g.RotationX(math.Pi / 2)).Mul(g.Scaling(10, 0.01, 10))
-	rightWall.SetMaterial(floor.Material)
+	otherWall := g.NewPlane()
+	otherWall.SetTransform(g.Translation(0, 0, 6).Mul(g.RotationY(-math.Pi / 4)).Mul(g.RotationX(math.Pi / 2)))
+	otherWall.SetMaterial(floor.Material)
 
 	middle := g.NewSphere()
 	middle.SetTransform(g.Translation(-0.5, 1, 0.5))
@@ -37,12 +37,12 @@ func main() {
 
 	world := g.NewWorld()
 	world.LightSource = g.NewPointLight(g.NewPoint(-10, 10, -10), g.NewColor(1, 1, 1))
-	world.Objects = []g.Sphere{
-		floor, leftWall, rightWall,
-		middle, right, left,
+	world.Objects = []g.Shape{
+		&floor, &wall, &otherWall,
+		&middle, &right, &left,
 	}
 
-	c := g.NewCamera(100, 16./9., math.Pi/3)
+	c := g.NewCamera(200, 16./9., math.Pi/3)
 	c.Transform = g.NewViewTransform(
 		g.NewPoint(0, 1.5, -5),
 		g.NewPoint(0, 1, 0),
