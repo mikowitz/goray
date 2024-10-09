@@ -7,6 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func GlassSphere() Sphere {
+	s := NewSphere()
+	s.Material.Transparency = 1.0
+	s.Material.RefractiveIndex = 1.5
+	return s
+}
+
 func TestSphereMaterial(t *testing.T) {
 	t.Run("a sphere's default material", func(t *testing.T) {
 		s := NewSphere()

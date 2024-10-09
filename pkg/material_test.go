@@ -16,6 +16,10 @@ func TestNewMaterial(t *testing.T) {
 	assert.Equal(t, m.Diffuse, 0.9)
 	assert.Equal(t, m.Specular, 0.9)
 	assert.Equal(t, m.Shininess, 200.0)
+	assert.Equal(t, m.Reflective, 0.0)
+	assert.Equal(t, m.Transparency, 0.0)
+	assert.Equal(t, m.RefractiveIndex, 1.0)
+	assert.Equal(t, m.Reflective, 0.0)
 }
 
 type LightingTestCase struct {

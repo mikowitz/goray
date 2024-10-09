@@ -93,4 +93,9 @@ func TestCheckersPattern(t *testing.T) {
 		assert.Equal(t, pattern.At(NewPoint(0, 0, 1.01)), Black())
 	})
 
+	t.Run("repeats in all directions", func(t *testing.T) {
+		assert.Equal(t, pattern.At(NewPoint(0.99, 0, 0.99)), White())
+		assert.Equal(t, pattern.At(NewPoint(1.01, 0, 0.99)), Black())
+		assert.Equal(t, pattern.At(NewPoint(1.01, 0, 1.01)), White())
+	})
 }
