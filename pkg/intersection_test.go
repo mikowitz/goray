@@ -119,7 +119,6 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		comps := i.PrepareComputations(r, Intersections{i})
 		assert.True(t, comps.UnderPoint.z > 0.000005)
 		assert.True(t, comps.Point.z < comps.UnderPoint.z)
-
 	})
 
 	t.Run("the reflection vector", func(t *testing.T) {
@@ -170,4 +169,44 @@ func TestFindingN1AndN2(t *testing.T) {
 		assert.Equal(t, comps.N1, tc[0])
 		assert.Equal(t, comps.N2, tc[1])
 	}
+}
+
+func TestSchlickApproximation(t *testing.T) {
+	t.Run("under total internal reflection", func(t *testing.T) {
+		s := GlassSphere()
+		r := NewRay(NewPoint(0, 0, math.Sqrt2/2), NewVector(0, 1, 0))
+
+		xs := Intersections{
+			NewIntersection(-math.Sqrt2/2, &s),
+			NewIntersection(math.Sqrt2/2, &s),
+		}
+		comps := xs[1].PrepareComputations(r, xs)
+
+		assert.Equal(t, comps.Schlick(), 1.0)
+	})
+
+	t.Run("with a perpendicular viewing angle", func(t *testing.T) {
+		s := GlassSphere()
+		r := NewRay(NewPoint(0, 0, 0), NewVector(0, 1, 0))
+
+		xs := Intersections{
+			NewIntersection(-1, &s),
+			NewIntersection(1, &s),
+		}
+		comps := xs[1].PrepareComputations(r, xs)
+
+		assert.InDelta(t, comps.Schlick(), 0.04, 0.00001)
+	})
+
+	t.Run("with small angle and n2 > n1", func(t *testing.T) {
+		s := GlassSphere()
+		r := NewRay(NewPoint(0, 0.99, -2), NewVector(0, 0, 1))
+
+		xs := Intersections{
+			NewIntersection(1.8589, &s),
+		}
+		comps := xs[0].PrepareComputations(r, xs)
+
+		assert.InDelta(t, comps.Schlick(), 0.48873, 0.00001)
+	})
 }

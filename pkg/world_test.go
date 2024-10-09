@@ -111,7 +111,6 @@ func TestShadeHit(t *testing.T) {
 		floor.SetTransform(Translation(0, -1, 0))
 		floor.Material.Transparency = 0.5
 		floor.Material.RefractiveIndex = 1.5
-		w.Objects = append(w.Objects, &floor)
 
 		ball := NewSphere()
 		red := NewSolidPattern(NewColor(1, 0, 0))
@@ -129,6 +128,32 @@ func TestShadeHit(t *testing.T) {
 		comps := xs[0].PrepareComputations(r, xs)
 		c := w.ShadeHit(comps, 5)
 		assert.True(t, TuplesEqual(c, NewColor(0.93642, 0.68642, 0.68642)))
+	})
+
+	t.Run("with a reflective, transparent material", func(t *testing.T) {
+		w := defaultWorld()
+		floor := NewPlane()
+		floor.SetTransform(Translation(0, -1, 0))
+		floor.Material.Reflective = 0.5
+		floor.Material.Transparency = 0.5
+		floor.Material.RefractiveIndex = 1.5
+
+		ball := NewSphere()
+		red := NewSolidPattern(NewColor(1, 0, 0))
+		ball.Material.Pattern = &red
+		ball.Material.Ambient = 0.5
+		ball.SetTransform(Translation(0, -3.5, -0.5))
+
+		w.Objects = append(w.Objects, &floor, &ball)
+
+		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
+		xs := Intersections{
+			NewIntersection(math.Sqrt2, &floor),
+		}
+
+		comps := xs[0].PrepareComputations(r, xs)
+		c := w.ShadeHit(comps, 5)
+		assert.True(t, TuplesEqual(c, NewColor(0.93391, 0.69643, 0.69243)))
 	})
 }
 

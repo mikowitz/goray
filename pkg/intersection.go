@@ -2,6 +2,7 @@ package goray
 
 import (
 	"cmp"
+	"math"
 	"slices"
 )
 
@@ -94,4 +95,21 @@ func (xs Intersections) Hit() (Intersection, bool) {
 		return Intersection{}, false
 	}
 	return xs[i], true
+}
+
+func (c Computations) Schlick() float64 {
+	cos := c.Eyev.Dot(c.Normalv)
+
+	if c.N1 > c.N2 {
+		n := c.N1 / c.N2
+		sin2T := n * n * (1.0 - cos*cos)
+		if sin2T > 1.0 {
+			return 1.0
+		}
+
+		cosT := math.Sqrt(1.0 - sin2T)
+		cos = cosT
+	}
+	r0 := math.Pow((c.N1-c.N2)/(c.N1+c.N2), 2)
+	return r0 + (1-r0)*math.Pow(1-cos, 5)
 }

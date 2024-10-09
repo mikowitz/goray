@@ -33,7 +33,13 @@ func (w World) ShadeHit(c Computations, depth int) Color {
 	reflected := w.ReflectedColor(c, depth)
 	refracted := w.RefractedColor(c, depth)
 
-	return surface.Add(reflected).Add(refracted)
+	material := c.Object.GetMaterial()
+	if material.Reflective > 0.0 && material.Transparency > 0.0 {
+		reflectance := c.Schlick()
+		return surface.Add(reflected.Mul(reflectance)).Add(refracted.Mul(1.0 - reflectance))
+	} else {
+		return surface.Add(reflected).Add(refracted)
+	}
 }
 
 func (w World) ColorAt(r Ray, depth int) Color {
