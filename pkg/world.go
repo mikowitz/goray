@@ -25,16 +25,20 @@ func (w World) Intersect(ray Ray) Intersections {
 	return xs
 }
 
-func (w World) ShadeHit(c Computations) Color {
+func (w World) ShadeHit(c Computations, depth int) Color {
 	inShadow := w.IsShadowed(c.OverPoint)
-	return c.Object.GetMaterial().Lighting(c.Object, w.LightSource, c.Point, c.Eyev, c.Normalv, inShadow)
+	surface := c.Object.GetMaterial().Lighting(c.Object, w.LightSource, c.Point, c.Eyev, c.Normalv, inShadow)
+
+	reflected := w.ReflectedColor(c, depth)
+
+	return surface.Add(reflected)
 }
 
-func (w World) ColorAt(r Ray) Color {
+func (w World) ColorAt(r Ray, depth int) Color {
 	xs := w.Intersect(r)
 	if hit, isHit := xs.Hit(); isHit {
 		comps := hit.PrepareComputations(r)
-		return w.ShadeHit(comps)
+		return w.ShadeHit(comps, depth)
 	}
 	return NewColor(0, 0, 0)
 }
@@ -49,4 +53,17 @@ func (w World) IsShadowed(point Point) bool {
 		return hit.T < distance
 	}
 	return false
+}
+
+func (w World) ReflectedColor(c Computations, depth int) Color {
+	if depth <= 0 {
+		return Black()
+	}
+	if c.Object.GetMaterial().Reflective == 0 {
+		return Black()
+	}
+	reflectRay := NewRay(c.OverPoint, c.Reflectv)
+	color := w.ColorAt(reflectRay, depth-1)
+
+	return color.Mul(c.Object.GetMaterial().Reflective)
 }

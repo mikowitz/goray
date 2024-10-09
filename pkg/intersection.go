@@ -13,12 +13,12 @@ type Intersection struct {
 type Intersections []Intersection
 
 type Computations struct {
-	Object        Shape
-	T             float64
-	Point         Point
-	OverPoint     Point
-	Eyev, Normalv Vector
-	Inside        bool
+	Object                  Shape
+	T                       float64
+	Point                   Point
+	OverPoint               Point
+	Eyev, Normalv, Reflectv Vector
+	Inside                  bool
 }
 
 func NewIntersection(t float64, s Shape) Intersection {
@@ -29,6 +29,7 @@ func (i Intersection) PrepareComputations(ray Ray) Computations {
 	point := ray.At(i.T)
 	eyev := ray.Direction.Neg()
 	normalv := NormalAt(i.Object, point)
+	reflectv := ray.Direction.Reflect(normalv)
 	inside := false
 
 	if normalv.Dot(eyev) < 0 {
@@ -43,6 +44,7 @@ func (i Intersection) PrepareComputations(ray Ray) Computations {
 		OverPoint: point.Add(normalv.Mul(0.00001)),
 		Eyev:      eyev,
 		Normalv:   normalv,
+		Reflectv:  reflectv,
 		Inside:    inside,
 	}
 }

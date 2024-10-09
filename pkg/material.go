@@ -3,18 +3,20 @@ package goray
 import "math"
 
 type Material struct {
-	Ambient, Diffuse, Specular, Shininess float64
-	Pattern                               Pattern
+	Ambient, Diffuse, Specular float64
+	Shininess, Reflective      float64
+	Pattern                    Pattern
 }
 
 func NewMaterial() Material {
 	pattern := NewSolidPattern(White())
 	return Material{
-		Pattern:   &pattern,
-		Ambient:   0.1,
-		Diffuse:   0.9,
-		Specular:  0.9,
-		Shininess: 200.0,
+		Pattern:    &pattern,
+		Ambient:    0.1,
+		Diffuse:    0.9,
+		Specular:   0.9,
+		Shininess:  200.0,
+		Reflective: 0.0,
 	}
 }
 

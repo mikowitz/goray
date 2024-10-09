@@ -1,6 +1,7 @@
 package goray
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -51,7 +52,7 @@ func TestShadeHit(t *testing.T) {
 		i := NewIntersection(4, shape)
 
 		comps := i.PrepareComputations(r)
-		c := w.ShadeHit(comps)
+		c := w.ShadeHit(comps, 0)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.38066, 0.47583, 0.2855)))
 	})
@@ -65,7 +66,7 @@ func TestShadeHit(t *testing.T) {
 		i := NewIntersection(0.5, shape)
 
 		comps := i.PrepareComputations(r)
-		c := w.ShadeHit(comps)
+		c := w.ShadeHit(comps, 0)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.90498, 0.90498, 0.90498)))
 	})
@@ -81,9 +82,26 @@ func TestShadeHit(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, 5), NewVector(0, 0, 1))
 		i := NewIntersection(4, &s2)
 		comps := i.PrepareComputations(r)
-		c := w.ShadeHit(comps)
+		c := w.ShadeHit(comps, 0)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.1, 0.1, 0.1)))
+	})
+
+	t.Run("with a reflective material", func(t *testing.T) {
+		w := defaultWorld()
+		s := NewPlane()
+		s.Material.Reflective = 0.5
+		s.SetTransform(Translation(0, -1, 0))
+		w.Objects = append(w.Objects, &s)
+
+		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
+		i := NewIntersection(math.Sqrt2, &s)
+
+		comps := i.PrepareComputations(r)
+
+		c := w.ShadeHit(comps, 1)
+
+		assert.True(t, TuplesEqual(c, NewColor(0.87675, 0.92434, 0.82917)))
 	})
 }
 
@@ -92,13 +110,13 @@ func TestColorAt(t *testing.T) {
 
 	t.Run("when a ray misses", func(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 1, 0))
-		c := w.ColorAt(r)
+		c := w.ColorAt(r, 0)
 		assert.True(t, TuplesEqual(c, NewColor(0, 0, 0)))
 	})
 
 	t.Run("when a ray hits", func(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
-		c := w.ColorAt(r)
+		c := w.ColorAt(r, 0)
 		assert.True(t, TuplesEqual(c, NewColor(0.38066, 0.47583, 0.2855)))
 	})
 
@@ -110,7 +128,7 @@ func TestColorAt(t *testing.T) {
 		w.Objects[1].SetMaterial(m)
 
 		r := NewRay(NewPoint(0, 0, 0.75), NewVector(0, 0, -1))
-		c := w.ColorAt(r)
+		c := w.ColorAt(r, 0)
 
 		assert.True(t, TuplesEqual(c, w.Objects[1].GetMaterial().Pattern.At(r.Origin)))
 	})
@@ -133,4 +151,55 @@ func TestIsShadowed(t *testing.T) {
 		}
 	}
 
+}
+
+func TestReflectedColor(t *testing.T) {
+	t.Run("for a nonreflective material", func(t *testing.T) {
+		w := defaultWorld()
+		r := NewRay(NewPoint(0, 0, 0), NewVector(0, 0, 1))
+		m := w.Objects[1].GetMaterial()
+		m.Ambient = 1.0
+		w.Objects[1].SetMaterial(m)
+
+		i := NewIntersection(1, w.Objects[1])
+		comps := i.PrepareComputations(r)
+
+		c := w.ReflectedColor(comps, 0)
+
+		assert.Equal(t, c, NewColor(0, 0, 0))
+	})
+
+	t.Run("for a reflective material", func(t *testing.T) {
+		w := defaultWorld()
+		s := NewPlane()
+		s.Material.Reflective = 0.5
+		s.SetTransform(Translation(0, -1, 0))
+		w.Objects = append(w.Objects, &s)
+
+		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
+		i := NewIntersection(math.Sqrt2, &s)
+
+		comps := i.PrepareComputations(r)
+
+		c := w.ReflectedColor(comps, 1)
+
+		assert.True(t, TuplesEqual(c, NewColor(0.19033, 0.23791, 0.14274)))
+	})
+
+	t.Run("at maximum recursive depth", func(t *testing.T) {
+		w := defaultWorld()
+		s := NewPlane()
+		s.Material.Reflective = 0.5
+		s.SetTransform(Translation(0, -1, 0))
+		w.Objects = append(w.Objects, &s)
+
+		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
+		i := NewIntersection(math.Sqrt2, &s)
+
+		comps := i.PrepareComputations(r)
+
+		c := w.ReflectedColor(comps, 0)
+
+		assert.True(t, TuplesEqual(c, Black()))
+	})
 }

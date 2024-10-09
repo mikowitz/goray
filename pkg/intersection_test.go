@@ -1,6 +1,7 @@
 package goray
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -107,5 +108,15 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		assert.True(t, comps.OverPoint.z < -0.000005)
 		assert.True(t, comps.Point.z > comps.OverPoint.z)
 
+	})
+
+	t.Run("the reflection vector", func(t *testing.T) {
+		s := NewPlane()
+		r := NewRay(NewPoint(0, 1, -1), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
+		i := NewIntersection(math.Sqrt2/2, &s)
+
+		comps := i.PrepareComputations(r)
+
+		assert.True(t, TuplesEqual(comps.Reflectv, NewVector(0, math.Sqrt2/2, math.Sqrt2/2)))
 	})
 }
