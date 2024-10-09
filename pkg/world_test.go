@@ -1,6 +1,7 @@
 package goray
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -51,7 +52,7 @@ func TestShadeHit(t *testing.T) {
 		shape := w.Objects[0]
 		i := NewIntersection(4, shape)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 		c := w.ShadeHit(comps, 0)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.38066, 0.47583, 0.2855)))
@@ -65,7 +66,7 @@ func TestShadeHit(t *testing.T) {
 		shape := w.Objects[1]
 		i := NewIntersection(0.5, shape)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 		c := w.ShadeHit(comps, 0)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.90498, 0.90498, 0.90498)))
@@ -81,7 +82,7 @@ func TestShadeHit(t *testing.T) {
 
 		r := NewRay(NewPoint(0, 0, 5), NewVector(0, 0, 1))
 		i := NewIntersection(4, &s2)
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 		c := w.ShadeHit(comps, 0)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.1, 0.1, 0.1)))
@@ -97,11 +98,37 @@ func TestShadeHit(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
 		i := NewIntersection(math.Sqrt2, &s)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		c := w.ShadeHit(comps, 1)
 
 		assert.True(t, TuplesEqual(c, NewColor(0.87675, 0.92434, 0.82917)))
+	})
+
+	t.Run("with a transparent material", func(t *testing.T) {
+		w := defaultWorld()
+		floor := NewPlane()
+		floor.SetTransform(Translation(0, -1, 0))
+		floor.Material.Transparency = 0.5
+		floor.Material.RefractiveIndex = 1.5
+		w.Objects = append(w.Objects, &floor)
+
+		ball := NewSphere()
+		red := NewSolidPattern(NewColor(1, 0, 0))
+		ball.Material.Pattern = &red
+		ball.Material.Ambient = 0.5
+		ball.SetTransform(Translation(0, -3.5, -0.5))
+
+		w.Objects = append(w.Objects, &floor, &ball)
+
+		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
+		xs := Intersections{
+			NewIntersection(math.Sqrt2, &floor),
+		}
+
+		comps := xs[0].PrepareComputations(r, xs)
+		c := w.ShadeHit(comps, 5)
+		assert.True(t, TuplesEqual(c, NewColor(0.93642, 0.68642, 0.68642)))
 	})
 }
 
@@ -162,7 +189,7 @@ func TestReflectedColor(t *testing.T) {
 		w.Objects[1].SetMaterial(m)
 
 		i := NewIntersection(1, w.Objects[1])
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		c := w.ReflectedColor(comps, 0)
 
@@ -179,7 +206,7 @@ func TestReflectedColor(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
 		i := NewIntersection(math.Sqrt2, &s)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		c := w.ReflectedColor(comps, 1)
 
@@ -196,10 +223,123 @@ func TestReflectedColor(t *testing.T) {
 		r := NewRay(NewPoint(0, 0, -3), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
 		i := NewIntersection(math.Sqrt2, &s)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		c := w.ReflectedColor(comps, 0)
 
 		assert.True(t, TuplesEqual(c, Black()))
 	})
+}
+
+func TestRefractedColor(t *testing.T) {
+	t.Run("with an opaque surface", func(t *testing.T) {
+		w := defaultWorld()
+		shape := w.Objects[0]
+
+		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
+
+		xs := Intersections{
+			NewIntersection(4, shape),
+			NewIntersection(6, shape),
+		}
+
+		comps := xs[0].PrepareComputations(r, xs)
+
+		c := w.RefractedColor(comps, 5)
+
+		assert.Equal(t, c, Black())
+	})
+
+	t.Run("at maximum recursive depth", func(t *testing.T) {
+		w := defaultWorld()
+		m := w.Objects[0].GetMaterial()
+		m.Transparency = 1.0
+		m.RefractiveIndex = 1.5
+		w.Objects[0].SetMaterial(m)
+		shape := w.Objects[0]
+
+		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
+
+		xs := Intersections{
+			NewIntersection(4, shape),
+			NewIntersection(6, shape),
+		}
+
+		comps := xs[0].PrepareComputations(r, xs)
+
+		c := w.RefractedColor(comps, 0)
+
+		assert.Equal(t, c, Black())
+	})
+
+	t.Run("under total internal reflection", func(t *testing.T) {
+		w := defaultWorld()
+		m := w.Objects[0].GetMaterial()
+		m.Transparency = 1.0
+		m.RefractiveIndex = 1.5
+		w.Objects[0].SetMaterial(m)
+		shape := w.Objects[0]
+
+		r := NewRay(NewPoint(0, 0, math.Sqrt2/2), NewVector(0, 1, 0))
+
+		xs := Intersections{
+			NewIntersection(-math.Sqrt2/2, shape),
+			NewIntersection(math.Sqrt2/2, shape),
+		}
+
+		comps := xs[1].PrepareComputations(r, xs)
+		c := w.ReflectedColor(comps, 5)
+
+		assert.Equal(t, c, Black())
+	})
+
+	t.Run("with a refracted ray", func(t *testing.T) {
+		w := defaultWorld()
+		m := w.Objects[0].GetMaterial()
+		m.Ambient = 1.0
+		pattern := DemoPattern{Transform: IdentityMatrix()}
+		m.Pattern = &pattern
+		w.Objects[0].SetMaterial(m)
+
+		m = w.Objects[1].GetMaterial()
+		m.Transparency = 1.0
+		m.RefractiveIndex = 1.5
+		w.Objects[1].SetMaterial(m)
+
+		r := NewRay(NewPoint(0, 0, 0.1), NewVector(0, 1, 0))
+
+		xs := Intersections{
+			NewIntersection(-0.9899, w.Objects[0]),
+			NewIntersection(-0.4899, w.Objects[1]),
+			NewIntersection(0.4899, w.Objects[1]),
+			NewIntersection(0.9899, w.Objects[0]),
+		}
+
+		comps := xs[2].PrepareComputations(r, xs)
+		c := w.RefractedColor(comps, 5)
+		fmt.Println(c)
+		assert.True(t, TuplesEqual(c, NewColor(0, 0.99888, 0.04722)))
+	})
+}
+
+type DemoPattern struct {
+	Transform Matrix
+}
+
+func (dp *DemoPattern) At(p Point) Color {
+	return NewColor(p.x, p.y, p.z)
+}
+
+func (dp *DemoPattern) AtObject(shape Shape, point Point) Color {
+	objectPoint := shape.GetTransform().Inverse().Mult(point)
+	patternPoint := dp.GetTransform().Inverse().Mult(objectPoint)
+	return dp.At(patternPoint)
+}
+
+func (dp *DemoPattern) GetTransform() Matrix {
+	return dp.Transform
+}
+
+func (dp *DemoPattern) SetTransform(m Matrix) {
+	dp.Transform = m
 }

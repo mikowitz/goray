@@ -16,16 +16,17 @@ type Computations struct {
 	Object                  Shape
 	T                       float64
 	Point                   Point
-	OverPoint               Point
+	OverPoint, UnderPoint   Point
 	Eyev, Normalv, Reflectv Vector
 	Inside                  bool
+	N1, N2                  float64
 }
 
 func NewIntersection(t float64, s Shape) Intersection {
 	return Intersection{T: t, Object: s}
 }
 
-func (i Intersection) PrepareComputations(ray Ray) Computations {
+func (i Intersection) PrepareComputations(ray Ray, xs Intersections) Computations {
 	point := ray.At(i.T)
 	eyev := ray.Direction.Neg()
 	normalv := NormalAt(i.Object, point)
@@ -37,15 +38,48 @@ func (i Intersection) PrepareComputations(ray Ray) Computations {
 		normalv = normalv.Neg()
 	}
 
+	var n1 float64
+	var n2 float64
+
+	containers := []Shape{}
+	for _, x := range xs {
+		if x == i {
+			if len(containers) == 0 {
+				n1 = 1.0
+			} else {
+				n1 = containers[len(containers)-1].GetMaterial().RefractiveIndex
+			}
+		}
+
+		if slices.Contains(containers, x.Object) {
+			containers = slices.DeleteFunc(containers, func(s Shape) bool {
+				return s == x.Object
+			})
+		} else {
+			containers = append(containers, x.Object)
+		}
+
+		if x == i {
+			if len(containers) == 0 {
+				n2 = 1.0
+			} else {
+				n2 = containers[len(containers)-1].GetMaterial().RefractiveIndex
+			}
+		}
+	}
+
 	return Computations{
-		Object:    i.Object,
-		T:         i.T,
-		Point:     point,
-		OverPoint: point.Add(normalv.Mul(0.00001)),
-		Eyev:      eyev,
-		Normalv:   normalv,
-		Reflectv:  reflectv,
-		Inside:    inside,
+		Object:     i.Object,
+		T:          i.T,
+		Point:      point,
+		OverPoint:  point.Add(normalv.Mul(0.00001)),
+		UnderPoint: point.Sub(normalv.Mul(0.00001)),
+		Eyev:       eyev,
+		Normalv:    normalv,
+		Reflectv:   reflectv,
+		Inside:     inside,
+		N1:         n1,
+		N2:         n2,
 	}
 }
 

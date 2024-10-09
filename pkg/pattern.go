@@ -1,6 +1,8 @@
 package goray
 
-import "math"
+import (
+	"math"
+)
 
 type Pattern interface {
 	At(p Point) Color

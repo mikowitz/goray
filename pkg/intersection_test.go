@@ -75,7 +75,7 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		shape := NewSphere()
 		i := NewIntersection(4, &shape)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		assert.Equal(t, comps.T, i.T)
 		assert.True(t, TuplesEqual(comps.Point, NewPoint(0, 0, -1)))
@@ -89,7 +89,7 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		shape := NewSphere()
 		i := NewIntersection(1, &shape)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		assert.Equal(t, comps.T, i.T)
 		assert.True(t, TuplesEqual(comps.Point, NewPoint(0, 0, 1)))
@@ -104,9 +104,21 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		shape.SetTransform(Translation(0, 0, 1))
 		i := NewIntersection(5, &shape)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 		assert.True(t, comps.OverPoint.z < -0.000005)
 		assert.True(t, comps.Point.z > comps.OverPoint.z)
+
+	})
+
+	t.Run("the underpoint is offset below the surface", func(t *testing.T) {
+		r := NewRay(NewPoint(0, 0, -5), NewVector(0, 0, 1))
+		shape := GlassSphere()
+		shape.SetTransform(Translation(0, 0, 1))
+		i := NewIntersection(5, &shape)
+
+		comps := i.PrepareComputations(r, Intersections{i})
+		assert.True(t, comps.UnderPoint.z > 0.000005)
+		assert.True(t, comps.Point.z < comps.UnderPoint.z)
 
 	})
 
@@ -115,8 +127,47 @@ func TestPrecomputingIntersectionState(t *testing.T) {
 		r := NewRay(NewPoint(0, 1, -1), NewVector(0, -math.Sqrt2/2, math.Sqrt2/2))
 		i := NewIntersection(math.Sqrt2/2, &s)
 
-		comps := i.PrepareComputations(r)
+		comps := i.PrepareComputations(r, Intersections{i})
 
 		assert.True(t, TuplesEqual(comps.Reflectv, NewVector(0, math.Sqrt2/2, math.Sqrt2/2)))
 	})
+}
+
+func TestFindingN1AndN2(t *testing.T) {
+	a := GlassSphere()
+	a.SetTransform(Scaling(2, 2, 2))
+	a.Material.RefractiveIndex = 1.5
+
+	b := GlassSphere()
+	b.SetTransform(Translation(0, 0, -0.25))
+	b.Material.RefractiveIndex = 2.0
+
+	c := GlassSphere()
+	c.SetTransform(Translation(0, 0, 0.25))
+	c.Material.RefractiveIndex = 2.5
+
+	r := NewRay(NewPoint(0, 0, -4), NewVector(0, 0, 1))
+	xs := Intersections{
+		NewIntersection(2, &a),
+		NewIntersection(2.75, &b),
+		NewIntersection(3.25, &c),
+		NewIntersection(4.75, &b),
+		NewIntersection(5.25, &c),
+		NewIntersection(6, &a),
+	}
+
+	testCases := [][2]float64{
+		[2]float64{1, 1.5},
+		[2]float64{1.5, 2},
+		[2]float64{2, 2.5},
+		[2]float64{2.5, 2.5},
+		[2]float64{2.5, 1.5},
+		[2]float64{1.5, 1.0},
+	}
+
+	for i, tc := range testCases {
+		comps := xs[i].PrepareComputations(r, xs)
+		assert.Equal(t, comps.N1, tc[0])
+		assert.Equal(t, comps.N2, tc[1])
+	}
 }

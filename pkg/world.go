@@ -2,6 +2,7 @@ package goray
 
 import (
 	"cmp"
+	"math"
 	"slices"
 )
 
@@ -30,14 +31,15 @@ func (w World) ShadeHit(c Computations, depth int) Color {
 	surface := c.Object.GetMaterial().Lighting(c.Object, w.LightSource, c.Point, c.Eyev, c.Normalv, inShadow)
 
 	reflected := w.ReflectedColor(c, depth)
+	refracted := w.RefractedColor(c, depth)
 
-	return surface.Add(reflected)
+	return surface.Add(reflected).Add(refracted)
 }
 
 func (w World) ColorAt(r Ray, depth int) Color {
 	xs := w.Intersect(r)
 	if hit, isHit := xs.Hit(); isHit {
-		comps := hit.PrepareComputations(r)
+		comps := hit.PrepareComputations(r, xs)
 		return w.ShadeHit(comps, depth)
 	}
 	return NewColor(0, 0, 0)
@@ -66,4 +68,27 @@ func (w World) ReflectedColor(c Computations, depth int) Color {
 	color := w.ColorAt(reflectRay, depth-1)
 
 	return color.Mul(c.Object.GetMaterial().Reflective)
+}
+
+func (w World) RefractedColor(c Computations, depth int) Color {
+	if depth <= 0 {
+		return Black()
+	}
+	if c.Object.GetMaterial().Transparency == 0.0 {
+		return Black()
+	}
+	nRatio := c.N1 / c.N2
+	cosI := c.Eyev.Dot(c.Normalv)
+
+	sin2T := nRatio * nRatio * (1 - cosI*cosI)
+
+	if sin2T > 1.0 {
+		return Black()
+	}
+
+	cosT := math.Sqrt(1.0 - sin2T)
+	direction := c.Normalv.Mul(nRatio*cosI - cosT).Sub(c.Eyev.Mul(nRatio))
+
+	refractRay := NewRay(c.UnderPoint, direction)
+	return w.ColorAt(refractRay, depth-1).Mul(c.Object.GetMaterial().Transparency)
 }
